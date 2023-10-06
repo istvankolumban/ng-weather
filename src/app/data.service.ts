@@ -1,4 +1,4 @@
-import { Injectable, Signal, signal } from '@angular/core';
+import { Injectable, OnDestroy, Signal, signal } from '@angular/core';
 import { TrackedLocation } from './conditions-and-zip.type';
 import { LocationService } from './location.service';
 import { WeatherService } from './weather.service';
@@ -10,7 +10,7 @@ import { tap } from 'rxjs/operators';
 @Injectable({
   providedIn: 'root',
 })
-export class DataService {
+export class DataService implements OnDestroy {
   private locations = signal<TrackedLocation[]>([]);
   private timers: Array<{
     zip: string;
@@ -18,7 +18,11 @@ export class DataService {
   }> = [];
 
   constructor(private locationService: LocationService, private weatherService: WeatherService) {
-    this.locations.set(this.locationService.getLocationsFromLocalStorage());
+    const locationsFromStorage = this.locationService.getLocationsFromLocalStorage();
+    locationsFromStorage.forEach((loc: TrackedLocation) => {
+      this.registerTimer(loc.zip);
+    })
+    this.locations.set(locationsFromStorage);
   }
 
   addLocation(zip: string): void {
@@ -31,17 +35,9 @@ export class DataService {
           lastRefreshed: new Date(),
         };
         this.locations.mutate((locations) => locations.push(trackedLocation));
-
         this.locationService.addOrUpdateLocationToLocalStorage(trackedLocation);
-
-        const timerId = window.setInterval(() => {
-          this.refreshLocation(zip);
-        }, 5000);
-
-        this.timers.push({
-          zip,
-          timerId,
-        });
+        
+        this.registerTimer(zip);
       });
     }
   }
@@ -56,9 +52,7 @@ export class DataService {
     });
     this.locationService.removeLocationFromLocalSotage(zip);
 
-    const timerIndex = this.timers.findIndex((timer) => timer.zip === zip);
-    clearInterval(this.timers[timerIndex].timerId);
-    this.timers.splice(timerIndex, 1);
+    this.clearTimer(zip);
   }
 
   getLocations(): Signal<TrackedLocation[]> {
@@ -109,5 +103,28 @@ export class DataService {
       this.locations.mutate((locations) => (locations[locationIndex] = trackedLocation));
       this.locationService.addOrUpdateLocationToLocalStorage(trackedLocation);
     });
+  }
+
+  private registerTimer(zip: string): void {
+    const timerId = window.setInterval(() => {
+      this.refreshLocation(zip);
+    }, 5000);
+
+    this.timers.push({
+      zip,
+      timerId,
+    });
+  }
+
+  private clearTimer(zip: string): void {
+    const timerIndex = this.timers.findIndex((timer) => timer.zip === zip);
+    clearInterval(this.timers[timerIndex].timerId);
+    this.timers.splice(timerIndex, 1);
+  }
+
+  ngOnDestroy(): void {
+    this.timers.forEach((timer) => {
+      clearInterval(timer.timerId);
+    })
   }
 }
