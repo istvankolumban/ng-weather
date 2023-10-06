@@ -4,16 +4,18 @@ import { FormsModule } from '@angular/forms';
 
 import { AppComponent } from './app.component';
 import { ZipcodeEntryComponent } from './zipcode-entry/zipcode-entry.component';
-import {LocationService} from "./location.service";
+import { LocationService } from './location.service';
 import { ForecastsListComponent } from './forecasts-list/forecasts-list.component';
-import {WeatherService} from "./weather.service";
+import { WeatherService } from './weather.service';
 import { CurrentConditionsComponent } from './current-conditions/current-conditions.component';
 import { MainPageComponent } from './main-page/main-page.component';
-import {RouterModule} from "@angular/router";
-import {routing} from "./app.routing";
-import {HttpClientModule} from "@angular/common/http";
+import { RouterModule } from '@angular/router';
+import { routing } from './app.routing';
+import { HttpClientModule } from '@angular/common/http';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
+import { TabsComponent } from './current-conditions/tabs/tabs.component';
+import { TabComponent } from './current-conditions/tabs/tab/tab.component';
 
 @NgModule({
   declarations: [
@@ -21,7 +23,9 @@ import { environment } from '../environments/environment';
     ZipcodeEntryComponent,
     ForecastsListComponent,
     CurrentConditionsComponent,
-    MainPageComponent
+    MainPageComponent,
+    TabsComponent,
+    TabComponent,
   ],
   imports: [
     BrowserModule,
@@ -29,9 +33,9 @@ import { environment } from '../environments/environment';
     HttpClientModule,
     RouterModule,
     routing,
-    ServiceWorkerModule.register('/ngsw-worker.js', { enabled: environment.production })
+    ServiceWorkerModule.register('/ngsw-worker.js', { enabled: environment.production }),
   ],
   providers: [LocationService, WeatherService],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}
