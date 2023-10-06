@@ -12,6 +12,10 @@ import { tap } from 'rxjs/operators';
 })
 export class DataService {
   private locations = signal<TrackedLocation[]>([]);
+  private timers: Array<{
+    zip: string;
+    timerId: number;
+  }> = [];
 
   constructor(private locationService: LocationService, private weatherService: WeatherService) {
     this.locations.set(this.locationService.getLocationsFromLocalStorage());
@@ -29,6 +33,15 @@ export class DataService {
         this.locations.mutate((locations) => locations.push(trackedLocation));
 
         this.locationService.addOrUpdateLocationToLocalStorage(trackedLocation);
+
+        const timerId = window.setInterval(() => {
+          this.refreshLocation(zip);
+        }, 5000);
+
+        this.timers.push({
+          zip,
+          timerId,
+        });
       });
     }
   }
@@ -42,6 +55,10 @@ export class DataService {
       }
     });
     this.locationService.removeLocationFromLocalSotage(zip);
+
+    const timerIndex = this.timers.findIndex((timer) => timer.zip === zip);
+    clearInterval(this.timers[timerIndex].timerId);
+    this.timers.splice(timerIndex, 1);
   }
 
   getLocations(): Signal<TrackedLocation[]> {
@@ -72,7 +89,25 @@ export class DataService {
     return this.locations().findIndex((loc: TrackedLocation) => loc.zip === zip) !== -1;
   }
 
+  private locationIndex(zip: string): number {
+    return this.locations().findIndex((loc: TrackedLocation) => loc.zip === zip);
+  }
+
   private getLocation(zip): TrackedLocation {
     return this.locations().find((loc: TrackedLocation) => loc.zip === zip);
+  }
+
+  private refreshLocation(zip): void {
+    this.weatherService.getCurrentCondition(zip).subscribe((currentConditions: CurrentConditions) => {
+      const trackedLocation = {
+        zip,
+        currentConditions,
+        forecast: undefined,
+        lastRefreshed: new Date(),
+      };
+      const locationIndex = this.locationIndex(zip);
+      this.locations.mutate((locations) => (locations[locationIndex] = trackedLocation));
+      this.locationService.addOrUpdateLocationToLocalStorage(trackedLocation);
+    });
   }
 }
