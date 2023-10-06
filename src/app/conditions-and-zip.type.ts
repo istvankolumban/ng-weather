@@ -10,5 +10,4 @@ export interface TrackedLocation {
   zip: string;
   currentConditions: CurrentConditions;
   forecast: Forecast;
-  lastRefreshed: Date;
 }
