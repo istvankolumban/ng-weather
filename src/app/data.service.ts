@@ -26,7 +26,8 @@ export class DataService implements OnDestroy {
 
   addLocation(zip: string): void {
     if (!this.locationIsTracked(zip)) {
-      this.createLocation(zip);
+      this.createOrUpdateLocation(zip);
+      this.registerTimer(zip);
     }
   }
 
@@ -39,7 +40,6 @@ export class DataService implements OnDestroy {
       }
     });
     this.locationService.removeLocationFromLocalSotage(zip);
-
     this.clearTimer(zip);
   }
 
@@ -70,7 +70,7 @@ export class DataService implements OnDestroy {
     return this.locations().find((loc: TrackedLocation) => loc.zip === zip);
   }
 
-  private createLocation(zip): void {
+  private createOrUpdateLocation(zip): void {
     combineLatest([this.weatherService.getCurrentCondition(zip), this.weatherService.getForecast(zip)])
       .subscribe(([currentConditions, forecast]) => {
         const trackedLocation = {
@@ -78,30 +78,19 @@ export class DataService implements OnDestroy {
           currentConditions,
           forecast,
         };
-        this.locations.mutate((locations) => locations.push(trackedLocation));
-        this.locationService.addOrUpdateLocationToLocalStorage(trackedLocation);
-
-        this.registerTimer(zip);
-      })
-  }
-
-  private refreshLocation(zip): void {
-    combineLatest([this.weatherService.getCurrentCondition(zip), this.weatherService.getForecast(zip)])
-      .subscribe(([currentConditions, forecast]) => {
-        const trackedLocation = {
-          zip,
-          currentConditions,
-          forecast: forecast
-        };
         const locationIndex = this.locationIndex(zip);
-        this.locations.mutate((locations) => (locations[locationIndex] = trackedLocation));
+        if (locationIndex === -1) {
+          this.locations.mutate((locations) => locations.push(trackedLocation));
+        } else {
+          this.locations.mutate((locations) => (locations[locationIndex] = trackedLocation));
+        }
         this.locationService.addOrUpdateLocationToLocalStorage(trackedLocation);
       });
   }
 
   private registerTimer(zip: string): void {
     const timerId = window.setInterval(() => {
-      this.refreshLocation(zip);
+      this.createOrUpdateLocation(zip);
     }, 5000);
 
     this.timers.push({
@@ -120,5 +109,6 @@ export class DataService implements OnDestroy {
     this.timers.forEach((timer) => {
       clearInterval(timer.timerId);
     })
+    this.timers = [];
   }
 }

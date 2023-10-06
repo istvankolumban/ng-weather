@@ -8,10 +8,9 @@ export class LocationService {
   addOrUpdateLocationToLocalStorage(location: TrackedLocation): void {
     const locations = this.getLocationsFromLocalStorage();
     if (locations.length == 0) {
-      // create locations and add
       this.saveLocations([location]);
     } else {
-      const locationIndex = locations.findIndex((loc) => loc.zip === location.zip);
+      const locationIndex = this.getLocationIndex(locations, location.zip);
       if (locationIndex === -1) {
         locations.push(location);
       } else {
@@ -21,9 +20,9 @@ export class LocationService {
     }
   }
 
-  removeLocationFromLocalSotage(zipcode: string): void {
+  removeLocationFromLocalSotage(zip: string): void {
     const locations = this.getLocationsFromLocalStorage();
-    const index = locations.findIndex((loc) => loc.zip === zipcode);
+    const index = this.getLocationIndex(locations, zip);
     if (index !== -1) {
       locations.splice(index, 1);
       this.saveLocations(locations);
@@ -37,5 +36,9 @@ export class LocationService {
 
   private saveLocations(locations: TrackedLocation[]): void {
     localStorage.setItem(LOCATIONS, JSON.stringify(locations));
+  }
+
+  private getLocationIndex(locations: TrackedLocation[], zip: string): number {
+    return locations.findIndex((loc) => loc.zip === zip);
   }
 }
