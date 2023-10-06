@@ -1,16 +1,16 @@
 import { Component } from '@angular/core';
-import {LocationService} from "../location.service";
+import { LocationService } from '../location.service';
+import { DataService } from 'app/data.service';
 
 @Component({
   selector: 'app-zipcode-entry',
-  templateUrl: './zipcode-entry.component.html'
+  templateUrl: './zipcode-entry.component.html',
 })
 export class ZipcodeEntryComponent {
+  constructor(private service: LocationService, private dataService: DataService) {}
 
-  constructor(private service : LocationService) { }
-
-  addLocation(zipcode : string){
+  addLocation(zipcode: string) {
     this.service.addLocation(zipcode);
+    this.dataService.addLocation(zipcode);
   }
-
 }
