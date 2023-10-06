@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { LocationService } from '../location.service';
 import { DataService } from 'app/data.service';
 
 @Component({
@@ -7,9 +6,11 @@ import { DataService } from 'app/data.service';
   templateUrl: './zipcode-entry.component.html',
 })
 export class ZipcodeEntryComponent {
-  constructor(private service: LocationService, private dataService: DataService) {}
+  constructor(private dataService: DataService) {}
 
   addLocation(zipcode: string) {
-    this.dataService.addLocation(zipcode);
+    if (zipcode) {
+      this.dataService.addLocation(zipcode);
+    }
   }
 }

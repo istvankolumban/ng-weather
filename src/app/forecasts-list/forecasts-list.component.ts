@@ -1,23 +1,27 @@
 import { Component } from '@angular/core';
-import {WeatherService} from '../weather.service';
-import {ActivatedRoute} from '@angular/router';
-import {Forecast} from './forecast.type';
+import { ActivatedRoute } from '@angular/router';
+import { Forecast } from './forecast.type';
+import { DataService } from 'app/data.service';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-forecasts-list',
   templateUrl: './forecasts-list.component.html',
-  styleUrls: ['./forecasts-list.component.css']
+  styleUrls: ['./forecasts-list.component.css'],
 })
 export class ForecastsListComponent {
-
-  zipcode: string;
   forecast: Forecast;
 
-  constructor(protected weatherService: WeatherService, route : ActivatedRoute) {
-    route.params.subscribe(params => {
-      this.zipcode = params['zipcode'];
-      weatherService.getForecast(this.zipcode)
-        .subscribe(data => this.forecast = data);
-    });
+  constructor(route: ActivatedRoute, private dataService: DataService) {
+    route.params
+      .pipe(
+        switchMap((params) => {
+          const zipcode = params['zipcode'];
+          return this.dataService.getForecast(zipcode);
+        })
+      )
+      .subscribe((forecast: Forecast) => {
+        this.forecast = forecast;
+      });
   }
 }

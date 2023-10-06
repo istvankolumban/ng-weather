@@ -3,6 +3,8 @@ import { TrackedLocation } from './conditions-and-zip.type';
 import { LocationService } from './location.service';
 import { WeatherService } from './weather.service';
 import { CurrentConditions } from './current-conditions/current-conditions.type';
+import { Forecast } from './forecasts-list/forecast.type';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -45,7 +47,11 @@ export class DataService {
     return this.locations.asReadonly();
   }
 
-  getLocationImage(id: string): string {
+  getWeatherIcon(id: string): string {
     return this.weatherService.getWeatherIcon(id);
+  }
+
+  getForecast(zip: string): Observable<Forecast> {
+    return this.weatherService.getForecast(zip); // temporary logic, just return the forecast for now. Later implement the save and retrieve.
   }
 }

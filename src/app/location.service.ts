@@ -2,29 +2,34 @@ import { Injectable } from '@angular/core';
 import { TrackedLocation } from './conditions-and-zip.type';
 
 export const LOCATIONS: string = 'locations';
-export const TRACKEDLOCATIONS: string = 'trackedLocations';
 
 @Injectable()
 export class LocationService {
-  addLocationToLocalStorage(trackedLocation: TrackedLocation): void {
-    const savedLocations: TrackedLocation[] = JSON.parse(localStorage.getItem(TRACKEDLOCATIONS));
-    if (savedLocations?.length == 0 || savedLocations?.find((location) => location.zip === trackedLocation.zip) === undefined) {
-      const stringified = JSON.stringify([trackedLocation]);
-      localStorage.setItem(TRACKEDLOCATIONS, stringified);
+  addLocationToLocalStorage(location: TrackedLocation): void {
+    const locations = this.getLocationsFromLocalStorage();
+    if (locations.length == 0) {
+      this.saveLocations([location]);
+    } else if (locations.findIndex((loc) => loc.zip === location.zip) === -1) {
+      locations.push(location);
+      this.saveLocations(locations);
+    }
+  }
+
+  removeLocationFromLocalSotage(zipcode: string): void {
+    const locations = this.getLocationsFromLocalStorage();
+    const index = locations.findIndex((location) => location.zip === zipcode);
+    if (index !== -1) {
+      locations.splice(index, 1);
+      this.saveLocations(locations);
     }
   }
 
   getLocationsFromLocalStorage(): TrackedLocation[] {
-    const savedLocations: TrackedLocation[] = JSON.parse(localStorage.getItem(TRACKEDLOCATIONS));
-    return savedLocations ?? [];
+    const locations: TrackedLocation[] = JSON.parse(localStorage.getItem(LOCATIONS) ?? '[]');
+    return locations;
   }
 
-  removeLocationFromLocalSotage(zipcode: string): void {
-    const savedLocations: TrackedLocation[] = JSON.parse(localStorage.getItem(TRACKEDLOCATIONS));
-    const index = savedLocations?.findIndex((location) => location.zip === zipcode);
-    if (index !== -1) {
-      savedLocations.splice(index, 1);
-      localStorage.setItem(TRACKEDLOCATIONS, JSON.stringify(savedLocations));
-    }
+  private saveLocations(locations: TrackedLocation[]): void {
+    localStorage.setItem(LOCATIONS, JSON.stringify(locations));
   }
 }

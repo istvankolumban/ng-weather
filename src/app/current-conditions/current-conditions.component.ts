@@ -19,6 +19,6 @@ export class CurrentConditionsComponent {
   }
 
   getWeatherIcon(id): string {
-    return this.dataService.getLocationImage(id);
+    return this.dataService.getWeatherIcon(id);
   }
 }
