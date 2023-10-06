@@ -10,7 +10,6 @@ export class ZipcodeEntryComponent {
   constructor(private service: LocationService, private dataService: DataService) {}
 
   addLocation(zipcode: string) {
-    this.service.addLocation(zipcode);
     this.dataService.addLocation(zipcode);
   }
 }

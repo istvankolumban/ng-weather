@@ -44,4 +44,8 @@ export class DataService {
   getLocations(): Signal<TrackedLocation[]> {
     return this.locations.asReadonly();
   }
+
+  getLocationImage(id: string): string {
+    return this.weatherService.getWeatherIcon(id);
+  }
 }
