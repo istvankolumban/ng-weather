@@ -4,7 +4,8 @@ import { LocationService } from './location.service';
 import { WeatherService } from './weather.service';
 import { CurrentConditions } from './current-conditions/current-conditions.type';
 import { Forecast } from './forecasts-list/forecast.type';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -17,7 +18,7 @@ export class DataService {
   }
 
   addLocation(zip: string): void {
-    if (this.locations().find((location: TrackedLocation) => location.zip === zip) === undefined) {
+    if (!this.locationIsTracked(zip)) {
       this.weatherService.getCurrentCondition(zip).subscribe((currentConditions: CurrentConditions) => {
         const trackedLocation = {
           zip,
@@ -27,7 +28,7 @@ export class DataService {
         };
         this.locations.mutate((locations) => locations.push(trackedLocation));
 
-        this.locationService.addLocationToLocalStorage(trackedLocation);
+        this.locationService.addOrUpdateLocationToLocalStorage(trackedLocation);
       });
     }
   }
@@ -52,6 +53,26 @@ export class DataService {
   }
 
   getForecast(zip: string): Observable<Forecast> {
-    return this.weatherService.getForecast(zip); // temporary logic, just return the forecast for now. Later implement the save and retrieve.
+    if (this.locationIsTracked(zip)) {
+      const location: TrackedLocation = this.getLocation(zip);
+      if (location?.forecast) {
+        return of(location.forecast);
+      } else {
+        return this.weatherService.getForecast(zip).pipe(
+          tap((forecast: Forecast) => {
+            location.forecast = forecast;
+            this.locationService.addOrUpdateLocationToLocalStorage(location);
+          })
+        );
+      }
+    }
+  }
+
+  private locationIsTracked(zip: string): boolean {
+    return this.locations().findIndex((loc: TrackedLocation) => loc.zip === zip) !== -1;
+  }
+
+  private getLocation(zip): TrackedLocation {
+    return this.locations().find((loc: TrackedLocation) => loc.zip === zip);
   }
 }

@@ -5,19 +5,25 @@ export const LOCATIONS: string = 'locations';
 
 @Injectable()
 export class LocationService {
-  addLocationToLocalStorage(location: TrackedLocation): void {
+  addOrUpdateLocationToLocalStorage(location: TrackedLocation): void {
     const locations = this.getLocationsFromLocalStorage();
     if (locations.length == 0) {
+      // create locations and add
       this.saveLocations([location]);
-    } else if (locations.findIndex((loc) => loc.zip === location.zip) === -1) {
-      locations.push(location);
+    } else {
+      const locationIndex = locations.findIndex((loc) => loc.zip === location.zip);
+      if (locationIndex === -1) {
+        locations.push(location);
+      } else {
+        locations[locationIndex] = location;
+      }
       this.saveLocations(locations);
     }
   }
 
   removeLocationFromLocalSotage(zipcode: string): void {
     const locations = this.getLocationsFromLocalStorage();
-    const index = locations.findIndex((location) => location.zip === zipcode);
+    const index = locations.findIndex((loc) => loc.zip === zipcode);
     if (index !== -1) {
       locations.splice(index, 1);
       this.saveLocations(locations);
