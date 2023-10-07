@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 import { AppComponent } from './app.component';
 import { ZipcodeEntryComponent } from './zipcode-entry/zipcode-entry.component';
-import { LocationService } from './location.service';
+import { LocalStorageService } from './local-storage.service';
 import { ForecastsListComponent } from './forecasts-list/forecasts-list.component';
 import { WeatherService } from './weather.service';
 import { CurrentConditionsComponent } from './current-conditions/current-conditions.component';
@@ -35,7 +35,7 @@ import { TabComponent } from './current-conditions/tabs/tab/tab.component';
     routing,
     ServiceWorkerModule.register('/ngsw-worker.js', { enabled: environment.production }),
   ],
-  providers: [LocationService, WeatherService],
+  providers: [LocalStorageService, WeatherService],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

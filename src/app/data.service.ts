@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy, Signal, signal } from '@angular/core';
 import { TrackedLocation } from './tracked-location.type';
-import { LocationService } from './location.service';
+import { LocalStorageService } from './local-storage.service';
 import { WeatherService } from './weather.service';
 import { Forecast } from './forecasts-list/forecast.type';
 import { Observable, Subscription, combineLatest, interval, of } from 'rxjs';
@@ -18,7 +18,7 @@ export class DataService implements OnDestroy {
     subscription: Subscription
   }> = [];
 
-  constructor(private locationService: LocationService, private weatherService: WeatherService) {
+  constructor(private locationService: LocalStorageService, private weatherService: WeatherService) {
     const locationsFromStorage = this.locationService.getLocationsFromLocalStorage();
     locationsFromStorage.forEach((loc: TrackedLocation) => {
       this.createOrUpdateLocation(loc.zip);
