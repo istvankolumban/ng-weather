@@ -10,6 +10,6 @@ import { Component, Input } from '@angular/core';
 })
 export class TabComponent {
   @Input() title = '';
-  @Input() zipcode = '';
-  activated = false;
+  @Input() index = -1;
+  @Input() activated = false;
 }

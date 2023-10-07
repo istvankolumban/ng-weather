@@ -1,6 +1,5 @@
-import { AfterContentInit, Component, ContentChildren, QueryList } from '@angular/core';
+import { Component, ContentChildren, EventEmitter, Output, QueryList } from '@angular/core';
 import { TabComponent } from './tab/tab.component';
-import { DataService } from 'app/data.service';
 
 @Component({
   selector: 'app-tabs',
@@ -10,14 +9,14 @@ import { DataService } from 'app/data.service';
         *ngFor="let tab of tabs"
         (click)="selectTab(tab)"
         class="nav-item"
-        [class.active]="tab.active"
+        [class.active]="tab.activated"
       >
         <a
           href="#"
           class="nav-link"
-          >{{ tab.title }} ({{ tab.zipcode }})<span
+          >{{ tab.title }}<span
             class="close"
-            (click)="closeLocation(tab.zipcode)"
+            (click)="closeTab(tab.index)"
             >&times;</span
           ></a
         >
@@ -27,30 +26,17 @@ import { DataService } from 'app/data.service';
   `,
   styleUrls: ['./tabs.component.css'],
 })
-export class TabsComponent implements AfterContentInit {
+export class TabsComponent {
+  @Output() removeEvent = new EventEmitter<number>();
+  @Output() selectEvent = new EventEmitter<number>();
+
   @ContentChildren(TabComponent) tabs: QueryList<TabComponent>;
 
-  constructor(private dataService: DataService) {}
-
-  ngAfterContentInit(): void {
-    // This have to be refactored later. The goal is to remove the setTimeout
-    setTimeout(() => {
-      if (this.tabs.length > 0) {
-        let activatedTabs = this.tabs.filter((tab) => tab.activated);
-
-        if (activatedTabs.length === 0) {
-          this.selectTab(this.tabs.toArray()[0]);
-        }
-      }
-    }, 500);
-  }
-
   selectTab(tab: TabComponent): void {
-    this.tabs.forEach((tab) => (tab.activated = false));
-    tab.activated = true;
+    this.selectEvent.emit(tab.index);
   }
 
-  closeLocation(zipcode: string) {
-    this.dataService.removeLocation(zipcode);
+  closeTab(index: number) {
+    this.removeEvent.emit(index);
   }
 }
