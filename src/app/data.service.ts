@@ -5,12 +5,12 @@ import { WeatherService } from './weather.service';
 import { Forecast } from './forecasts-list/forecast.type';
 import { Observable, Subscription, combineLatest, interval, of } from 'rxjs';
 import { startWith, switchMap } from 'rxjs/operators';
+import { environment } from 'environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class DataService implements OnDestroy {
-  private static REFRESH_TIME: number = 2 * 60 * 60 * 1000; // two hours
   private locations = signal<TrackedLocation[]>([]);
 
   private trackedSubscriptions: Array<{
@@ -71,7 +71,7 @@ export class DataService implements OnDestroy {
   }
 
   private createOrUpdateLocation(zip): void {
-    const subscription = interval(DataService.REFRESH_TIME).pipe(
+    const subscription = interval(environment.refreshTime).pipe(
       startWith(0),
       switchMap(() =>
         combineLatest([this.weatherService.getCurrentCondition(zip), this.weatherService.getForecast(zip)])
