@@ -3,27 +3,7 @@ import { TabComponent } from './tab/tab.component';
 
 @Component({
   selector: 'app-tabs',
-  template: `
-    <ul class="nav nav-tabs">
-      <li
-        *ngFor="let tab of tabs"
-        (click)="selectTab(tab)"
-        class="nav-item"
-        [class.active]="tab.activated"
-      >
-        <a
-          href="#"
-          class="nav-link"
-          >{{ tab.title }}<span
-            class="close"
-            (click)="closeTab(tab.index)"
-            >&times;</span
-          ></a
-        >
-      </li>
-    </ul>
-    <ng-content></ng-content>
-  `,
+  templateUrl: './tabs.component.html',
   styleUrls: ['./tabs.component.css'],
 })
 export class TabsComponent {

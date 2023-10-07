@@ -4,7 +4,7 @@ import { TrackedLocation } from './tracked-location.type';
 export const LOCATIONS: string = 'locations';
 
 @Injectable()
-export class LocationService {
+export class LocalStorageService {
   addOrUpdateLocationToLocalStorage(location: TrackedLocation): void {
     const locations = this.getLocationsFromLocalStorage();
     if (locations.length == 0) {
