@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { TrackedLocation } from './conditions-and-zip.type';
+import { TrackedLocation } from './tracked-location.type';
 
 export const LOCATIONS: string = 'locations';
 

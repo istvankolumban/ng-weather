@@ -1,6 +1,6 @@
 import { Component, inject, Signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { TrackedLocation } from '../conditions-and-zip.type';
+import { TrackedLocation } from '../tracked-location.type';
 import { DataService } from 'app/data.service';
 
 @Component({

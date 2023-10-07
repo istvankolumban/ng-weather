@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy, Signal, signal } from '@angular/core';
-import { TrackedLocation } from './conditions-and-zip.type';
+import { TrackedLocation } from './tracked-location.type';
 import { LocationService } from './location.service';
 import { WeatherService } from './weather.service';
 import { Forecast } from './forecasts-list/forecast.type';
