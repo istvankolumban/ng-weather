@@ -2,8 +2,7 @@
   <app-tabs>
     <app-tab
       *ngFor="let location of trackedLocations()"
-      [title]="location.currentConditions.name"
-      [zipcode]="location.zip"
+      title="{{ location.currentConditions.name }} ({{ location.zip }})"
       style="padding: 1rem"
     >
       <div>

@@ -10,14 +10,14 @@ import { DataService } from 'app/data.service';
         *ngFor="let tab of tabs"
         (click)="selectTab(tab)"
         class="nav-item"
-        [class.active]="tab.active"
+        [class.active]="tab.activated"
       >
         <a
           href="#"
           class="nav-link"
-          >{{ tab.title }} ({{ tab.zipcode }})<span
+          >{{ tab.title }}<span
             class="close"
-            (click)="closeLocation(tab.zipcode)"
+            (click)="closeLocation(1001)"
             >&times;</span
           ></a
         >
@@ -30,19 +30,18 @@ import { DataService } from 'app/data.service';
 export class TabsComponent implements AfterContentInit {
   @ContentChildren(TabComponent) tabs: QueryList<TabComponent>;
 
-  constructor(private dataService: DataService) {}
+  constructor(private dataService: DataService) {
+
+  }
 
   ngAfterContentInit(): void {
-    // This have to be refactored later. The goal is to remove the setTimeout
-    setTimeout(() => {
-      if (this.tabs.length > 0) {
-        let activatedTabs = this.tabs.filter((tab) => tab.activated);
+    if (this.tabs.length > 0) {
+      let activatedTabs = this.tabs.filter((tab) => tab.activated);
 
-        if (activatedTabs.length === 0) {
-          this.selectTab(this.tabs.toArray()[0]);
-        }
+      if (activatedTabs.length === 0) {
+        this.selectTab(this.tabs.toArray()[0]);
       }
-    }, 500);
+    }
   }
 
   selectTab(tab: TabComponent): void {
