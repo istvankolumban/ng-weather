@@ -1,6 +1,6 @@
 import { AfterContentInit, Component, ContentChildren, QueryList } from '@angular/core';
 import { TabComponent } from './tab/tab.component';
-import { LocationService } from 'app/location.service';
+import { DataService } from 'app/data.service';
 
 @Component({
   selector: 'app-tabs',
@@ -30,11 +30,11 @@ import { LocationService } from 'app/location.service';
 export class TabsComponent implements AfterContentInit {
   @ContentChildren(TabComponent) tabs: QueryList<TabComponent>;
 
-  constructor(private locationService: LocationService) {}
+  constructor(private dataService: DataService) {}
 
   ngAfterContentInit(): void {
     // This have to be refactored later. The goal is to remove the setTimeout
-    setTimeout(() => { 
+    setTimeout(() => {
       if (this.tabs.length > 0) {
         let activatedTabs = this.tabs.filter((tab) => tab.activated);
 
@@ -51,6 +51,6 @@ export class TabsComponent implements AfterContentInit {
   }
 
   closeLocation(zipcode: string) {
-    this.locationService.removeLocation(zipcode);
+    this.dataService.removeLocation(zipcode);
   }
 }

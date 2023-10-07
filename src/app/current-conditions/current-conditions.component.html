@@ -1,28 +1,28 @@
 <div class="container">
   <app-tabs>
     <app-tab
-      *ngFor="let location of currentConditionsByZip()"
-      [title]="location.data.name"
+      *ngFor="let location of trackedLocations()"
+      [title]="location.currentConditions.name"
       [zipcode]="location.zip"
       style="padding: 1rem"
     >
       <div>
         <div class="row">
           <div class="col-md-4">
-            <h4>Current conditions: {{ location.data.weather[0].main }}</h4>
+            <h4>Current conditions: {{ location.currentConditions.weather[0].main }}</h4>
             <h4>Temperatures today:</h4>
             <p>
-              Current {{ location.data.main.temp | number : '.0-0' }} - Max {{ location.data.main.temp_max | number : '.0-0' }} - Min
-              {{ location.data.main.temp_min | number : '.0-0' }}
+              Current {{ location.currentConditions.main.temp | number : '.0-0' }} - Max {{ location.currentConditions.main.temp_max | number : '.0-0' }} - Min
+              {{ location.currentConditions.main.temp_min | number : '.0-0' }}
             </p>
             <p>
-              <a [routerLink]="['/forecast', location.zip]">Show 5-day forecast for {{ location.data.name }}</a>
+              <a [routerLink]="['/forecast', location.zip]">Show 5-day forecast for {{ location.currentConditions.name }}</a>
             </p>
           </div>
           <div class="col-md-4">
             <img
-              [src]="weatherService.getWeatherIcon(location.data.weather[0].id)"
-              [alt]="location.data.name"
+              [src]="getWeatherIcon(location.currentConditions.weather[0].id)"
+              [alt]="location.currentConditions.name"
             />
           </div>
         </div>
