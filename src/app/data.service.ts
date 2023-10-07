@@ -10,7 +10,7 @@ import { startWith, switchMap } from 'rxjs/operators';
   providedIn: 'root',
 })
 export class DataService implements OnDestroy {
-  private static REFRESH_TIME: number = 10000; //2*60*60*1000;
+  private static REFRESH_TIME: number = 2 * 60 * 60 * 1000; // two hours
   private locations = signal<TrackedLocation[]>([]);
 
   private trackedSubscriptions: Array<{
