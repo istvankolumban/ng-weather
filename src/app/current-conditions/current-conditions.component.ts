@@ -6,7 +6,6 @@ import { DataService } from 'app/data.service';
 @Component({
   selector: 'app-current-conditions',
   templateUrl: './current-conditions.component.html',
-  styleUrls: ['./current-conditions.component.css'],
 })
 export class CurrentConditionsComponent implements OnDestroy {
   protected trackedLocations: Signal<TrackedLocation[]> = this.dataService.getLocations();
@@ -22,14 +21,14 @@ export class CurrentConditionsComponent implements OnDestroy {
     return this.dataService.getWeatherIcon(id);
   }
 
-  onRemoved(index): void {
+  onRemoved(index: number): void {
     const locationZipToRemove = this.trackedLocations()[index]?.zip;
     if (locationZipToRemove) {
       this.dataService.removeLocation(locationZipToRemove);
     }
   }
 
-  onSelected(index): void {
+  onSelected(index: number): void {
     this.activatedTabIndex = index;
   }
 
