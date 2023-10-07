@@ -3,31 +3,31 @@ import { TrackedLocation } from './conditions-and-zip.type';
 import { LocationService } from './location.service';
 import { WeatherService } from './weather.service';
 import { Forecast } from './forecasts-list/forecast.type';
-import { Observable, combineLatest, of } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { Observable, Subscription, combineLatest, interval, of } from 'rxjs';
+import { startWith, switchMap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
 })
 export class DataService implements OnDestroy {
+  private static REFRESH_TIME: number = 10000; //2*60*60*1000;
   private locations = signal<TrackedLocation[]>([]);
-  private timers: Array<{
+
+  private trackedSubscriptions: Array<{
     zip: string;
-    timerId: number;
+    subscription: Subscription
   }> = [];
 
   constructor(private locationService: LocationService, private weatherService: WeatherService) {
     const locationsFromStorage = this.locationService.getLocationsFromLocalStorage();
     locationsFromStorage.forEach((loc: TrackedLocation) => {
-      this.registerTimer(loc.zip);
-    })
-    this.locations.set(locationsFromStorage);
+      this.createOrUpdateLocation(loc.zip);
+    });
   }
 
   addLocation(zip: string): void {
     if (!this.locationIsTracked(zip)) {
       this.createOrUpdateLocation(zip);
-      this.registerTimer(zip);
     }
   }
 
@@ -40,7 +40,7 @@ export class DataService implements OnDestroy {
       }
     });
     this.locationService.removeLocationFromLocalSotage(zip);
-    this.clearTimer(zip);
+    this.unsubscribeFromSubscription(zip);
   }
 
   getLocations(): Signal<TrackedLocation[]> {
@@ -71,44 +71,42 @@ export class DataService implements OnDestroy {
   }
 
   private createOrUpdateLocation(zip): void {
-    combineLatest([this.weatherService.getCurrentCondition(zip), this.weatherService.getForecast(zip)])
-      .subscribe(([currentConditions, forecast]) => {
-        const trackedLocation = {
-          zip,
-          currentConditions,
-          forecast,
-        };
-        const locationIndex = this.locationIndex(zip);
-        if (locationIndex === -1) {
-          this.locations.mutate((locations) => locations.push(trackedLocation));
-        } else {
-          this.locations.mutate((locations) => (locations[locationIndex] = trackedLocation));
-        }
-        this.locationService.addOrUpdateLocationToLocalStorage(trackedLocation);
-      });
-  }
+    const subscription = interval(DataService.REFRESH_TIME).pipe(
+      startWith(0),
+      switchMap(() =>
+        combineLatest([this.weatherService.getCurrentCondition(zip), this.weatherService.getForecast(zip)])
+      )
+    ).subscribe(([currentConditions, forecast]) => {
+      const trackedLocation = {
+        zip,
+        currentConditions,
+        forecast,
+      };
+      const locationIndex = this.locationIndex(zip);
+      if (locationIndex === -1) {
+        this.locations.mutate((locations) => locations.push(trackedLocation));
+      } else {
+        this.locations.mutate((locations) => (locations[locationIndex] = trackedLocation));
+      }
+      this.locationService.addOrUpdateLocationToLocalStorage(trackedLocation);
+    });
 
-  private registerTimer(zip: string): void {
-    const timerId = window.setInterval(() => {
-      this.createOrUpdateLocation(zip);
-    }, 5000);
-
-    this.timers.push({
+    this.trackedSubscriptions.push({
       zip,
-      timerId,
+      subscription
     });
   }
 
-  private clearTimer(zip: string): void {
-    const timerIndex = this.timers.findIndex((timer) => timer.zip === zip);
-    clearInterval(this.timers[timerIndex].timerId);
-    this.timers.splice(timerIndex, 1);
+  private unsubscribeFromSubscription(zip: string): void {
+    const subscriptionIndex = this.trackedSubscriptions.findIndex((subscription) => subscription.zip === zip);
+    this.trackedSubscriptions[subscriptionIndex].subscription.unsubscribe();
+    this.trackedSubscriptions.splice(subscriptionIndex, 1);
   }
 
   ngOnDestroy(): void {
-    this.timers.forEach((timer) => {
-      clearInterval(timer.timerId);
+    this.trackedSubscriptions.forEach((subscription) => {
+      this.unsubscribeFromSubscription(subscription.zip)
     })
-    this.timers = [];
+    this.trackedSubscriptions = [];
   }
 }
